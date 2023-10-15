@@ -1,36 +1,15 @@
-import { REST, Routes, Client, GatewayIntentBits } from 'discord.js';
+import config from './config';
+import './slash_commands';
+import { client } from './bot';
+import { BotSlashCommands } from './slash_commands';
 
-const TOKEN = 'MTE2MzA5MTk2MjI0MTQ5NTEzMQ.G6vgRf.akeWaougbN8Gcz6E3VbJJ_svn3ok4l870MyC0Y';
+const token = config.token();
 
-const commands = [{ name: 'ping', description: 'Replies with Pong!' }];
-const rest = new REST({ version: '10' }).setToken(TOKEN);
+console.log('Started refreshing application (/) commands.');
+BotSlashCommands.reinit()
+	.then(() => {
+		console.log('Successfully reloaded application (/) commands.');
+	})
+	.catch((err) => console.error('error while updating slash commands ', err));
 
-try {
-	console.log('Started refreshing application (/) commands.');
-
-	rest.put(Routes.applicationCommands(''), { body: commands });
-
-	console.log('Successfully reloaded application (/) commands.');
-} catch (error) {
-	console.error(error);
-}
-
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-
-client.on('ready', () => {
-	if (!client.user) {
-		return;
-	}
-
-	console.log(`Logged in as ${client.user.tag}!`);
-});
-
-client.on('interactionCreate', async (interaction) => {
-	if (!interaction.isChatInputCommand()) return;
-
-	if (interaction.commandName === 'ping') {
-		await interaction.reply('Pong!');
-	}
-});
-
-client.login(TOKEN);
+client.login(token).then(console.info).catch(console.error);
